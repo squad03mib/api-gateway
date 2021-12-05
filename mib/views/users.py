@@ -1,6 +1,6 @@
-from flask import Blueprint, redirect, render_template, url_for, flash
-from flask_login import (login_user, login_required)
-
+from flask import Blueprint, redirect, render_template, url_for, flash, request
+from flask_login import (login_user, login_required, current_user)
+import datetime
 from mib.forms import UserForm
 from mib.rao.user_manager import UserManager
 from mib.auth.user import User
@@ -48,7 +48,8 @@ def create_user():
     else:
         for fieldName, errorMessages in form.errors.items():
             for errorMessage in errorMessages:
-                flash('The field %s is incorrect: %s' % (fieldName, errorMessage))
+                flash('The field %s is incorrect: %s' %
+                      (fieldName, errorMessage))
 
     return render_template('create_user.html', form=form)
 
@@ -69,6 +70,32 @@ def delete_user(id):
     if response.status_code != 202:
         flash("Error while deleting the user")
         return redirect(url_for('auth.profile', id=id))
-        
+
     return redirect(url_for('home.index'))
 
+
+@ users.route('/userinfo', methods=["GET", "POST"])
+@ login_required
+def get_user_info():
+    ''' GET: get the profile info page
+        POST: edit profile info'''
+    if request.method == "GET":
+        user = UserManager.get_user_by_id(current_user.id)
+        return render_template('user_info.html', user=user)
+    else:
+        new_email = request.form["email"]
+        new_firstname = request.form["first_name"]
+        new_lastname = request.form["last_name"]
+        new_date_of_birth = datetime.datetime.strptime(
+            request.form["date_of_birth"], '%Y-%m-%d').date()
+        new_password = request.form["password"]
+        user_dict = dict(email=new_email, firstname=new_firstname, lastname=new_lastname,
+                         date_of_birth=new_date_of_birth)
+
+        checkEmail = UserManager.get_user_by_email(new_email)
+        if checkEmail:
+            return render_template('user_info.html', emailError=True, user=user_dict)
+
+        UserManager.update_user(current_user.id, new_email, new_firstname,
+                    new_lastname, new_password, new_date_of_birth)
+        return render_template('user_info.html', user=user_dict)

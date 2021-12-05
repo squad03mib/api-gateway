@@ -24,9 +24,10 @@ class UserManager:
             if response.status_code == 200:
                 # user is authenticated
                 user = User.build_from_json(json_payload)
-                print("risposta: ",user)
+                print("risposta: ", user)
             else:
-                raise RuntimeError('Server has sent an unrecognized status code %s' % response.status_code)
+                raise RuntimeError(
+                    'Server has sent an unrecognized status code %s' % response.status_code)
 
         except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
             return abort(500)
@@ -44,6 +45,7 @@ class UserManager:
         try:
             response = requests.get("%s/user_email/%s" % (cls.USERS_ENDPOINT, user_email),
                                     timeout=cls.REQUESTS_TIMEOUT_SECONDS)
+            print(response)
             json_payload = response.json()
             user = None
 
@@ -101,7 +103,8 @@ class UserManager:
         return response
 
     @classmethod
-    def update_user(cls, user_id: int, email: str, password: str, phone: str):
+    def update_user(cls, user_id: int, email: str, firstname: str, lastname: str,
+                    password: str, birthdate: str):
         """
         This method contacts the users microservice
         to allow the users to update their profiles
@@ -118,8 +121,11 @@ class UserManager:
             url = "%s/users/%s" % (cls.USERS_ENDPOINT, str(user_id))
             response = requests.put(url,
                                     json={
-                                        'email': email,
-                                        'password': password
+                                         'email': email,
+                                         'password': password,
+                                         'first_name': firstname,
+                                         'last_name': lastname,
+                                         'birthdate': birthdate,
                                     },
                                     timeout=cls.REQUESTS_TIMEOUT_SECONDS
                                     )
@@ -141,7 +147,8 @@ class UserManager:
         try:
             logout_user()
             url = "%s/users/%s" % (cls.USERS_ENDPOINT, str(user_id))
-            response = requests.delete(url, timeout=cls.REQUESTS_TIMEOUT_SECONDS)
+            response = requests.delete(
+                url, timeout=cls.REQUESTS_TIMEOUT_SECONDS)
 
         except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
             return abort(500)
