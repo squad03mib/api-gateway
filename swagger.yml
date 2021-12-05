@@ -5,185 +5,623 @@ info:
   version: "0.1"
 servers:
 - url: /
-
 paths:
   /:
     get:
-      tags: [ Home ]
+      tags:
+      - Home
       summary: Return the home page of the web app
+      operationId: root_get
       responses:
-        200:
-          description: Renders the index.html template
-
+        "200":
+          description: fake
+          content:
+            text/html:
+              schema:
+                type: string
+                x-content-type: text/html
+              examples:
+                html:
+                  summary: A list containing two items
+                  value: <html><body><ul><li>item 1</li><li>item 2</li></ul></body></html>
+      x-openapi-router-controller: mib.views.home
   /login:
-    tags: [ Authentication ]
     get:
+      tags:
+      - Authentication
       summary: Shows the login page and its form
+      operationId: login_get
       responses:
-        200:
+        "200":
           description: Renders the login.html template
+      x-openapi-router-controller: mib.views.auth
     post:
+      tags:
+      - Authentication
       summary: Handles the login of the user
+      operationId: login_post
       requestBody:
-        required: true
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                email:
-                  type: string
-                password:
-                  type: string
-              required:
-                - email
-                - password
+              $ref: '#/components/schemas/login_body'
+        required: true
       responses:
-        200:
-          description: Reloads the login.html page with a warning, in case the user credentials were invalid
-        302:
-          description: Redirects to the correct profile page, depending on the type of the user
-
-  /relogin:
+        "200":
+          description: "Reloads the login.html page with a warning, in case the user\
+            \ credentials were invalid"
+        "302":
+          description: "Redirects to the correct profile page, depending on the type\
+            \ of the user"
+      x-openapi-router-controller: mib.views.auth
+  /logout:
     get:
-      tags: [ Authentication ]
-      summary: Utility route used to handle the user's session expiration
+      tags:
+      - Authentication
+      summary: Logs out the logged user
+      operationId: logout_get
       responses:
-        200:
-          description: Calls the login method
-  
-  /user/{id}:
+        "302":
+          description: Redirects to the homepage
+      x-openapi-router-controller: mib.views.auth
+  /users:
     get:
-      tags: [ Profile ]
-      summary: Shows the profile page of the customer specified by the id
+      tags:
+      - User
+      summary: This method allows to view all the users of the system
+      operationId: users_get
+      responses:
+        "200":
+          description: Renders the view_users template
+      x-openapi-router-controller: mib.views.users
+    post:
+      tags:
+      - User
+      summary: Handles the creation of the user
+      operationId: users_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/users_body'
+        required: true
+      responses:
+        "302":
+          description: Redirects to the user profile page
+      x-openapi-router-controller: mib.views.users
+  /users/{id_user}:
+    get:
+      tags:
+      - User
+      summary: This method allows to retrieve the information page for a user
+      operationId: users_id_user_get
       parameters:
-      - name: id
+      - name: id_user
         in: path
         description: Customer's unique identifier
         required: true
+        style: simple
+        explode: false
         schema:
           type: integer
       responses:
-        200:
-          description: Renders the customer_profile template, filled with the ssn form and the user's reservations
-        302:
-          description: Redirects to the homepage, in case the user accessing the profile is not its owner
-    
-    put:
-      summary: Updates the fields for the customer depending on its id
-      tags:
-        - Users
-      parameters:
-        - name: id
-          description: User Unique ID
-          in: path
-          required: true
-          schema:
-            type: integer
-            format: int64
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                email:
-                  type: string
-                  description: the email field for the user
-                password:
-                  type: string
-                  description: the password field for the user
-                phone:
-                  type: string
-                  description: the phone field for the user
-              required:
-                - email
-                - password
-                - phone
-      responses:
-        200:
-          description: Renders the update_customer template, to allow the customer to modify its data
-        302:
-          description: Redirects to the customer profile page
-  /logout:
-    get:
-      tags: [ Authentication ]
-      summary: Logs out the logged user
-      responses:
-        302:
-          description: Redirects to the homepage
-  /user/:
-    get:
-      tags: [ User ]
-      summary: This method allows to retrieve the sign up page for a new user
-      parameters:
-        - name: type_
-          description: type of the user
-          in: path
-          required: true
-          schema: 
-            type: string
-      responses:
-        200:
-          description: Renders the create_user template, filled with the fiels for the user's data
-    post:
-      summary: Add a new customer
-      tags: [ User ]
-      parameters:
-        - name: type_
-          description: type of the user
-          in: path
-          required: true
-          schema: 
-            type: string
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                email:
-                  type: string
-                  description: the email field for the user
-                password:
-                  type: string
-                  description: the password field for the user
-                social_number:
-                  type: string
-                  description: the social number field for the user
-                firstname: 
-                  type: string
-                  description: the firstname field for the user
-                lastname: 
-                  type: string
-                  description: the lastname field for the user
-                birthdate:
-                  type: string
-                  description: the birthday field for the user
-                phone:
-                  type: string
-                  description: the phone field for the user
-              required:
-                - email
-                - password
-      responses:
-        302:
-          description: Redirects to the correct profile page, depending on the type of the user
-  
-  /user/{user_id}:
+        "200":
+          description: "Renders the view_user template, filled with the fiels for\
+            \ the user's data"
+      x-openapi-router-controller: mib.views.users
     delete:
-        tags: [ User ]
-        description: Delete a user by its id
-        parameters:
-          - name: user_id
-            description: User Unique ID
-            in: path
-            required: true
+      tags:
+      - User
+      summary: This method allows to delete a user from the app
+      operationId: users_id_user_delete
+      parameters:
+      - name: id_user
+        in: path
+        description: Customer's unique identifier
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+      responses:
+        "302":
+          description: "User deleted, it redirects to the index page"
+        default:
+          description: Failed to delete the user
+      x-openapi-router-controller: mib.views.users
+  /signup:
+    get:
+      tags:
+      - User
+      summary: This method allows to retrieve the sign up page for a new user
+      operationId: signup_get
+      responses:
+        "200":
+          description: Renders the create_user template
+      x-openapi-router-controller: mib.views.users
+  /account:
+    get:
+      tags:
+      - User
+      summary: This method allows to retrieve the information page for the current
+        user
+      operationId: account_get
+      responses:
+        "200":
+          description: "Renders the view_user template, filled with the fiels for\
+            \ the user's data"
+      x-openapi-router-controller: mib.views.users
+    put:
+      tags:
+      - User
+      summary: Handles the update of the current user profile
+      operationId: account_put
+      requestBody:
+        content:
+          application/json:
             schema:
-              type: integer
-              format: int64
-        responses:
-          302:
-            description: User deleted, it redirects to the index page
+              $ref: '#/components/schemas/account_body'
+        required: true
+      responses:
+        "302":
+          description: Redirects to the current updated user profile page
+      x-openapi-router-controller: mib.views.users
+  /account/content_filters/{id_filter}:
+    get:
+      tags:
+      - User
+      summary: This method allows to retrieve the content filter info page for the
+        content filter
+      operationId: account_content_filters_id_filter_get
+      parameters:
+      - name: id_filter
+        in: path
+        description: Content filter's unique identifier
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+      responses:
+        "200":
+          description: Renders the view_content_filter template filled with the data
+            of the content filter
+      x-openapi-router-controller: mib.views.users
+    put:
+      tags:
+      - User
+      summary: Handles the update of the content filter of the current user
+      operationId: account_content_filters_id_filter_put
+      parameters:
+      - name: id_filter
+        in: path
+        description: Content filter's unique identifier
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/content_filters_id_filter_body'
+        required: true
+      responses:
+        "200":
+          description: Redirects to the current user profile page
+      x-openapi-router-controller: mib.views.users
+  /account/blacklist:
+    get:
+      tags:
+      - User
+      summary: This method allows to retrieve the blacklist page for the current user
+      operationId: account_blacklist_get
+      responses:
+        "200":
+          description: Renders the view_blacklist template filled with the data of
+            the current user
+      x-openapi-router-controller: mib.views.users
+    put:
+      tags:
+      - User
+      summary: Handles the update of the blacklist of the current user
+      operationId: account_blacklist_put
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/account_blacklist_body'
+        required: true
+      responses:
+        "302":
+          description: Redirects to the blacklist of the current user
+      x-openapi-router-controller: mib.views.users
+  /account/report:
+    get:
+      tags:
+      - User
+      summary: This method allows to retrieve the report page for the current user
+      operationId: account_report_get
+      responses:
+        "200":
+          description: Renders the view_report template filled with the data of the
+            current user
+      x-openapi-router-controller: mib.views.users
+    put:
+      tags:
+      - User
+      summary: Handles the update of the list of reported users of the current user
+      operationId: account_report_put
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/account_report_body'
+        required: true
+      responses:
+        "302":
+          description: Redirects to the list of reported users of the current user
+      x-openapi-router-controller: mib.views.users
+  /account/lottery:
+    get:
+      tags:
+      - User
+      summary: This method allows to retrieve the lottery page for the current user
+      operationId: account_lottery_get
+      responses:
+        "200":
+          description: Renders the view_lottery template filled with the data of the
+            current user
+      x-openapi-router-controller: mib.views.users
+  /account/lottery/spin:
+    post:
+      tags:
+      - User
+      summary: This method allows to spin the lottery
+      operationId: account_lottery_spin_post
+      responses:
+        "200":
+          description: Redirects to the /account/lottery page updated with new data
+      x-openapi-router-controller: mib.views.users
+  /outbox:
+    get:
+      tags:
+      - Mailbox
+      summary: This method allows to retrieve theoutbox page for the current user
+      operationId: outbox_get
+      responses:
+        "200":
+          description: Renders the view_outbox template filled with the data of the
+            current user
+      x-openapi-router-controller: swagger_server.controllers.mailbox_controller
+  /inbox:
+    get:
+      tags:
+      - Mailbox
+      summary: This method allows to retrieve the inbox page for the current user
+      operationId: inbox_get
+      responses:
+        "200":
+          description: Renders the view_inbox template filled with the data of the
+            current user
+      x-openapi-router-controller: swagger_server.controllers.mailbox_controller
+  /drafts:
+    get:
+      tags:
+      - Draft
+      summary: This method allows to retrieve the draft page for the current user
+      operationId: drafts_get
+      responses:
+        "200":
+          description: Renders the view_drafts template filled with the data of the
+            current user
+      x-openapi-router-controller: swagger_server.controllers.draft_controller
+    post:
+      tags:
+      - Draft
+      summary: Handles the creation of a draft message
+      operationId: drafts_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/drafts_body'
+        required: true
+      responses:
+        "302":
+          description: Redirect to the view_drafts page with the new draft added
+      x-openapi-router-controller: swagger_server.controllers.draft_controller
+  /drafts/{id_draft}:
+    get:
+      tags:
+      - Draft
+      summary: This method allows to retrieve the view page for the draft
+      operationId: drafts_id_draft_get
+      parameters:
+      - name: id_draft
+        in: path
+        description: Draft's unique identifier
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+      responses:
+        "200":
+          description: Renders the view_draft template filled with the data of the
+            draft
+      x-openapi-router-controller: swagger_server.controllers.draft_controller
+    put:
+      tags:
+      - Draft
+      summary: Handles the update of a draft message
+      operationId: drafts_id_draft_put
+      parameters:
+      - name: id_draft
+        in: path
+        description: Draft's unique identifier
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/drafts_id_draft_body'
+        required: true
+      responses:
+        "302":
+          description: Redirect to the view_drafts page with the new draft added
+      x-openapi-router-controller: swagger_server.controllers.draft_controller
+  /drafts/{id_draft}/send:
+    post:
+      tags:
+      - Draft
+      summary: This method allows to send the draft
+      operationId: drafts_id_draft_send_post
+      parameters:
+      - name: id_draft
+        in: path
+        description: Draft's unique identifier
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+      responses:
+        "200":
+          description: redirects to /outbox updated page
+      x-openapi-router-controller: swagger_server.controllers.draft_controller
+  /messages/send:
+    get:
+      tags:
+      - Message
+      summary: This method allows to retrieve the new message page
+      operationId: messages_send_get
+      responses:
+        "200":
+          description: Renders the create_message template filled with the data of
+            the current user
+      x-openapi-router-controller: swagger_server.controllers.message_controller
+    post:
+      tags:
+      - Message
+      summary: Handles the creation of a new message
+      operationId: messages_send_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/messages_send_body'
+        required: true
+      responses:
+        "302":
+          description: Send message to the recipient list
+      x-openapi-router-controller: swagger_server.controllers.message_controller
+  /messages/{id_message}:
+    get:
+      tags:
+      - Message
+      summary: This method allows to retrieve the view page for the message
+      operationId: messages_id_message_get
+      parameters:
+      - name: id_message
+        in: path
+        description: Message's unique identifier
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+      responses:
+        "200":
+          description: Show the message identified by id_message
+      x-openapi-router-controller: swagger_server.controllers.message_controller
+    delete:
+      tags:
+      - Message
+      summary: This method allows to delete a message from the inbox
+      operationId: messages_id_message_delete
+      parameters:
+      - name: id_message
+        in: path
+        description: Message's unique identifier
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+      responses:
+        "302":
+          description: "Message deleted, it redirects to the inbox page"
+        default:
+          description: Failed to delete the message
+      x-openapi-router-controller: swagger_server.controllers.message_controller
+  /messages/{id_message}/withdraw:
+    post:
+      tags:
+      - Message
+      summary: This method allows to withdraw the message using lottery points
+      operationId: messages_id_message_withdraw_post
+      parameters:
+      - name: id_message
+        in: path
+        description: Message's unique identifier
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+      responses:
+        "200":
+          description: Withdraw the message identified by id_message
+      x-openapi-router-controller: swagger_server.controllers.message_controller
+  /messages/{id_message}/forward:
+    get:
+      tags:
+      - Message
+      summary: This method allows to forward the message
+      operationId: messages_id_message_forward_get
+      parameters:
+      - name: id_message
+        in: path
+        description: Message's unique identifier
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+      responses:
+        "200":
+          description: Redirects to /messages/send page filled with the message data
+      x-openapi-router-controller: swagger_server.controllers.message_controller
+  /calendar/sent:
+    get:
+      tags:
+      - Mailbox
+      summary: This method allows to retrieve the calendar view of the messages sent
+      operationId: calendar_sent_get
+      responses:
+        "200":
+          description: Show the calendar filled with sent messages
+      x-openapi-router-controller: swagger_server.controllers.mailbox_controller
+  /calendar/received:
+    get:
+      tags:
+      - Mailbox
+      summary: This method allows to retrieve the calendar view of the messages received
+      operationId: calendar_received_get
+      responses:
+        "200":
+          description: Show the calendar filled with received messages
+      x-openapi-router-controller: swagger_server.controllers.mailbox_controller
+components:
+  schemas:
+    login_body:
+      required:
+      - email
+      - password
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+    users_body:
+      required:
+      - date_of_birth
+      - email
+      - firstname
+      - lastname
+      - password
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+        firstname:
+          type: string
+        lastname:
+          type: string
+        date_of_birth:
+          type: string
+    account_body:
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+        firstname:
+          type: string
+        lastname:
+          type: string
+        date_of_birth:
+          type: string
+    content_filters_id_filter_body:
+      required:
+      - active
+      type: object
+      properties:
+        active:
+          type: boolean
+    account_blacklist_body:
+      required:
+      - id_blacklisted
+      type: object
+      properties:
+        id_blacklisted:
+          type: integer
+    account_report_body:
+      required:
+      - id_reported
+      type: object
+      properties:
+        id_reported:
+          type: integer
+    drafts_body:
+      required:
+      - delivery_date
+      - recipient_list
+      - text
+      type: object
+      properties:
+        recipient_list:
+          type: string
+          description: recipient list must be a string in which every recipient is
+            separated by a comma
+        delivery_date:
+          type: string
+        text:
+          type: string
+    drafts_id_draft_body:
+      type: object
+      properties:
+        recipient_list:
+          type: string
+          description: recipient list must be a string in which every recipient is
+            separated by a comma
+        delivery_date:
+          type: string
+        text:
+          type: string
+    messages_send_body:
+      required:
+      - delivery_date
+      - recipient_list
+      - text
+      type: object
+      properties:
+        recipient_list:
+          type: string
+          description: recipient list must be a string in which every recipient is
+            separated by a comma
+        delivery_date:
+          type: string
+        text:
+          type: string
+

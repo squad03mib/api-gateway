@@ -29,7 +29,7 @@
         <h1>{{trials}} TRIALS LEFT</h1>
         <h2>{{points}} POINTS REMAINING</h2>
         {% if trials > 0 %}
-        <form action="/spin" method="POST">
+        <form action="/account/lottery/spin" method="POST">
           <input class="btn btn-primary" type="submit" value="Spin the roulette!" />
         </form>
         {% endif %}
