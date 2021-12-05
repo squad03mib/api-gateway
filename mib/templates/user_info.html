@@ -35,7 +35,7 @@
             <span class="font-weight-bold"><b>Profile</b></span>
             <img class="rounded-circle mt-2"
               src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png" width="90">
-            <span class="mt-1 font-weight-bold">{{user.firstname}} {{user.lastname}}</span>
+            <span class="mt-1 font-weight-bold">{{user.first_name}} {{user.last_name}}</span>
             <span class="text-black-50">{{user.email}}</span>
             <span>{{user.date_of_birth}}</span>
             <div class="form-check form-switch mt-2">
@@ -53,10 +53,10 @@
               <h6 class="text-right"></h6>
             </div>
             <div class="row mt-2">
-              <div class="col-md-6"><input required type="text" class="form-control" name="firstname" placeholder="First name"
-                  value={{user.firstname}}></div>
-              <div class="col-md-6"><input required type="text" class="form-control" name="lastname" placeholder="Last name"
-                  value={{user.lastname}}></div>
+              <div class="col-md-6"><input required type="text" class="form-control" name="first_name" placeholder="First name"
+                  value={{user.first_name}}></div>
+              <div class="col-md-6"><input required type="text" class="form-control" name="last_name" placeholder="Last name"
+                  value={{user.last_name}}></div>
             </div>
             <div class="row mt-3">
               <div class="col-md-6"><input required type="email" class="form-control" name="email" placeholder="Email"

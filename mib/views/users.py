@@ -1,5 +1,7 @@
-from flask import Blueprint, redirect, render_template, url_for, flash
-from flask_login import login_user, login_required, current_user
+
+from flask import Blueprint, redirect, render_template, url_for, flash, request
+from flask_login import (login_user, login_required, current_user)
+import datetime
 from mib.forms import UserForm
 from mib.rao.user_manager import UserManager
 from mib.rao.lottery_manager import LotteryManager
@@ -113,3 +115,30 @@ def account_lottery_spin_post():  # noqa: E501
     prize = lottery.points - old_points
 
     return render_template('lottery.html', points=lottery.points, trials=lottery.trials, prize=prize)
+
+
+@ users.route('/userinfo', methods=["GET", "POST"])
+@ login_required
+def get_user_info():
+    ''' GET: get the profile info page
+        POST: edit profile info'''
+    if request.method == "GET":
+        user = UserManager.get_user_by_id(current_user.id)
+        return render_template('user_info.html', user=user)
+    else:
+        new_email = request.form["email"]
+        new_firstname = request.form["first_name"]
+        new_lastname = request.form["last_name"]
+        new_date_of_birth = datetime.datetime.strptime(
+            request.form["date_of_birth"], '%Y-%m-%d').date()
+        new_password = request.form["password"]
+        user_dict = dict(email=new_email, firstname=new_firstname, lastname=new_lastname,
+                         date_of_birth=new_date_of_birth)
+
+        checkEmail = UserManager.get_user_by_email(new_email)
+        if checkEmail:
+            return render_template('user_info.html', emailError=True, user=user_dict)
+
+        UserManager.update_user(current_user.id, new_email, new_firstname,
+                                new_lastname, new_password, new_date_of_birth)
+        return render_template('user_info.html', user=user_dict)
