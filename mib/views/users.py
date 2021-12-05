@@ -76,47 +76,6 @@ def delete_user(id):
     return redirect(url_for('home.index'))
 
 
-@users.route('account/lottery', methods=['GET'])
-@login_required
-def account_lottery_get():
-    """This method allows to retrieve the lottery page for the current user
-
-     Args:
-        None
-
-    Returns: 
-        Return the page of the lottery
-    """
-    lottery = LotteryManager.get_lottery_by_id_user(current_user.id)
-    print(lottery)
-
-    return render_template('lottery.html', points=lottery.points, trials=lottery.trials)
-
-
-@users.route('account/lottery/spin', methods=['POST'])
-@login_required
-def account_lottery_spin_post():  # noqa: E501
-    """This method allows to spin the lottery
-
-     # noqa: E501
-
-
-    :rtype: None
-    """
-    lottery = LotteryManager.get_lottery_by_id_user(current_user.id)
-    if lottery is None:
-        old_points = 0
-        lottery = LotteryManager.create_lottery(current_user.id, 0, 1)
-    else:
-        old_points = lottery.trials
-        lottery = LotteryManager.update_lottery(
-            current_user.id, lottery.points, lottery.trials)
-
-    prize = lottery.points - old_points
-
-    return render_template('lottery.html', points=lottery.points, trials=lottery.trials, prize=prize)
-
-
 @ users.route('/userinfo', methods=["GET", "POST"])
 @ login_required
 def get_user_info():
