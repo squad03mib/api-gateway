@@ -4,7 +4,6 @@ from flask_login import (login_user, login_required, current_user)
 import datetime
 from mib.forms import UserForm
 from mib.rao.user_manager import UserManager
-from mib.rao.lottery_manager import LotteryManager
 from mib.auth.user import User
 
 users = Blueprint('users', __name__)
@@ -101,3 +100,69 @@ def get_user_info():
         UserManager.update_user(current_user.id, new_email, new_firstname,
                                 new_lastname, new_password, new_date_of_birth)
         return render_template('user_info.html', user=user_dict)
+
+
+@ users.route('/users', methods=["GET", "POST"])
+@ login_required
+def get_users():
+    '''GET: get the list of users
+       POST: create a user'''
+    if request.method == 'GET':
+        users = UserManager.get_all_users()
+
+    return render_template('users.html', users=users)
+
+
+@ users.route('/account/blacklist/add', methods=["GET", "POST"])
+@ login_required
+def add_user_to_blacklist():
+    ''' GET: get the list of users that the user can add to the blacklist
+        POST: add a user to the blacklist'''
+
+    if request.method == 'POST':
+        email = request.form.get('email')
+        user_blacklisted = UserManager.get_user_by_email(email)
+        id_blacklisted = user_blacklisted.id
+        UserManager.add_user_to_blacklist(id_blacklisted)
+
+        return redirect('/account/blacklist')
+
+    else:
+        blacklist = UserManager.get_blacklist(current_user.id)
+
+        users = []
+
+        if blacklist == []:
+            user_list = UserManager.get_all_users()
+            for item in user_list:
+                if item['id'] != current_user.id:
+                    users.append(item)
+        else:
+            for item in blacklist:
+                user_blacklisted = UserManager.get_user_by_id(
+                    item['id_blacklisted'])
+                if user_blacklisted.email not in users:
+                    users.append(user_blacklisted)
+
+        return render_template('add_to_blacklist.html', users=users)
+
+
+@ users.route('/account/blacklist', methods=["GET"])
+@ login_required
+def get_blacklist():
+    '''GET: get the user blacklist'''
+    blacklist = UserManager.get_blacklist(current_user.id)
+
+    print(blacklist)
+
+    users = []
+
+    for item in blacklist:
+        user_blacklisted = UserManager.get_user_by_id(
+            item['id_blacklisted'])
+        users.append({'email': user_blacklisted.email,
+                     'firstname': user_blacklisted.first_name, 'lastname': user_blacklisted.last_name})
+
+    print(users)
+
+    return render_template('blacklist.html', blacklist=users)

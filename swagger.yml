@@ -222,7 +222,18 @@ paths:
           description: Renders the view_blacklist template filled with the data of
             the current user
       x-openapi-router-controller: mib.views.users
-    put:
+  /account/blacklist/add:
+    get:
+      tags:
+      - User
+      summary: This method allows to retrieve the blacklist page for the current user
+      operationId: account_blacklist_get
+      responses:
+        "200":
+          description: Renders the view_blacklist template filled with the data of
+            the current user
+      x-openapi-router-controller: mib.views.users
+    post:
       tags:
       - User
       summary: Handles the update of the blacklist of the current user
@@ -248,7 +259,7 @@ paths:
           description: Renders the view_report template filled with the data of the
             current user
       x-openapi-router-controller: mib.views.users
-    put:
+    post:
       tags:
       - User
       summary: Handles the update of the list of reported users of the current user

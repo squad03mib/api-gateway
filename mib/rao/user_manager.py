@@ -1,6 +1,8 @@
+import json
+from flask.globals import current_app, request
 from mib.auth.user import User
 from mib import app
-from flask_login import (logout_user)
+from flask_login import (logout_user, current_user)
 from flask import abort
 import requests
 
@@ -121,11 +123,11 @@ class UserManager:
             url = "%s/users/%s" % (cls.USERS_ENDPOINT, str(user_id))
             response = requests.put(url,
                                     json={
-                                         'email': email,
-                                         'password': password,
-                                         'first_name': firstname,
-                                         'last_name': lastname,
-                                         'birthdate': birthdate,
+                                        'email': email,
+                                        'password': password,
+                                        'first_name': firstname,
+                                        'last_name': lastname,
+                                        'birthdate': birthdate,
                                     },
                                     timeout=cls.REQUESTS_TIMEOUT_SECONDS
                                     )
@@ -187,3 +189,57 @@ class UserManager:
                 'Microservice users returned an invalid status code %s, and message %s'
                 % (response.status_code, json_response['error_message'])
             )
+
+    @classmethod
+    def get_all_users(cls):
+        try:
+            url = "%s/users" % (cls.USERS_ENDPOINT)
+
+            response = requests.get(url, timeout=cls.REQUESTS_TIMEOUT_SECONDS)
+            json_payload = response.json()
+            users = None
+
+            if response.status_code == 200:
+                users = json_payload
+
+        except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
+            return abort(500)
+
+        return users
+
+    @classmethod
+    def add_user_to_blacklist(cls, id_blacklisted: int):
+        try:
+            url = "%s/users/%s/blacklist" % (cls.USERS_ENDPOINT,
+                                             current_user.id)
+            response = requests.post(url,
+                                     json={
+                                         'id': id_blacklisted
+                                     },
+                                     timeout=cls.REQUESTS_TIMEOUT_SECONDS
+                                     )
+
+            print(response)
+
+        except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
+            return abort(500)
+
+        return response
+
+    @classmethod
+    def get_blacklist(cls, id_user: int):
+        try:
+            url = "%s/users/%s/blacklist" % (cls.USERS_ENDPOINT,
+                                             id_user)
+
+            response = requests.get(url, timeout=cls.REQUESTS_TIMEOUT_SECONDS)
+            json_payload = response.json()
+            blacklist = None
+
+            if response.status_code == 200:
+                blacklist = json_payload
+
+        except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
+            return abort(500)
+
+        return blacklist
