@@ -147,6 +147,20 @@ def add_user_to_blacklist():
         return render_template('add_to_blacklist.html', users=users)
 
 
+@ users.route('/account/blacklist/remove', methods=["POST"])
+@ login_required
+def remove_user_from_blacklist():
+    '''POST: remove a user from the blacklist'''
+
+    if request.method == 'POST':
+        email = request.form.get('email')
+        user_blacklisted = UserManager.get_user_by_email(email)
+        id_blacklisted = user_blacklisted.id
+        UserManager.remove_user_from_blacklist(id_blacklisted)
+
+        return redirect('/account/blacklist')
+
+
 @ users.route('/account/blacklist', methods=["GET"])
 @ login_required
 def get_blacklist():

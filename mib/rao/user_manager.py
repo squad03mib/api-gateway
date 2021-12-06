@@ -225,6 +225,19 @@ class UserManager:
         return response
 
     @classmethod
+    def remove_user_from_blacklist(cls, id_blacklisted: int):
+        try:
+            url = "%s/users/%s/blacklist/%s" % (cls.USERS_ENDPOINT,
+                                                current_user.id, id_blacklisted)
+            response = requests.delete(
+                url, timeout=cls.REQUESTS_TIMEOUT_SECONDS)
+
+        except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
+            return abort(500)
+
+        return response
+
+    @classmethod
     def get_blacklist(cls, id_user: int):
         try:
             url = "%s/users/%s/blacklist" % (cls.USERS_ENDPOINT,
@@ -264,24 +277,6 @@ class UserManager:
         try:
             url = "%s/users/%s/report" % (cls.USERS_ENDPOINT,
                                           id_user)
-
-            response = requests.get(url, timeout=cls.REQUESTS_TIMEOUT_SECONDS)
-            json_payload = response.json()
-            report = None
-
-            if response.status_code == 200:
-                report = json_payload
-
-        except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
-            return abort(500)
-
-        return report
-
-    @classmethod
-    def get_num_reports(cls, id_user: int):
-        try:
-            url = "%s/users/%s/report/num_reports" % (cls.USERS_ENDPOINT,
-                                                      id_user)
 
             response = requests.get(url, timeout=cls.REQUESTS_TIMEOUT_SECONDS)
             json_payload = response.json()

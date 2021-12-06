@@ -237,7 +237,23 @@ paths:
       tags:
       - User
       summary: Handles the update of the blacklist of the current user
-      operationId: account_blacklist_put
+      operationId: account_blacklist_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/account_blacklist_body'
+        required: true
+      responses:
+        "302":
+          description: Redirects to the blacklist of the current user
+      x-openapi-router-controller: mib.views.users
+  /account/blacklist/remove:
+    post:
+      tags:
+      - User
+      summary: Handles the update of the blacklist of the current user
+      operationId: account_blacklist_delete
       requestBody:
         content:
           application/json:
@@ -274,7 +290,7 @@ paths:
       tags:
       - User
       summary: Handles the update of the list of reported users of the current user
-      operationId: account_report_put
+      operationId: account_report_post
       requestBody:
         content:
           application/json:
