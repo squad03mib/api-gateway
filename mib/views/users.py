@@ -153,8 +153,6 @@ def get_blacklist():
     '''GET: get the user blacklist'''
     blacklist = UserManager.get_blacklist(current_user.id)
 
-    print(blacklist)
-
     users = []
 
     for item in blacklist:
@@ -166,3 +164,54 @@ def get_blacklist():
     print(users)
 
     return render_template('blacklist.html', blacklist=users)
+
+
+@ users.route('/account/report/add', methods=["GET", "POST"])
+@ login_required
+def add_user_to_report():
+    ''' GET: get the list of reported users 
+        POST: add a user to the list of reported users'''
+
+    if request.method == 'POST':
+        email = request.form.get('email')
+        reported_user = UserManager.get_user_by_email(email)
+        id_reported = reported_user.id
+        UserManager.add_user_to_report(id_reported)
+
+        return redirect('/account/report')
+
+    else:
+        report_list = UserManager.get_report(current_user.id)
+
+        users = []
+
+        if report_list == []:
+            user_list = UserManager.get_all_users()
+            for item in user_list:
+                if item['id'] != current_user.id:
+                    users.append(item)
+        else:
+            for item in report_list:
+                reported_user = UserManager.get_user_by_id(
+                    item['id_reported'])
+                if reported_user.email not in users:
+                    users.append(reported_user)
+
+        return render_template('report_user.html', users=users)
+
+
+@ users.route('/account/report', methods=["GET"])
+@ login_required
+def get_report():
+    '''GET: get the list of reported users'''
+    report = UserManager.get_report(current_user.id)
+
+    users = []
+
+    for item in report:
+        user_blacklisted = UserManager.get_user_by_id(
+            item['id_reported'])
+        users.append({'email': user_blacklisted.email,
+                     'firstname': user_blacklisted.first_name, 'lastname': user_blacklisted.last_name})
+
+    return render_template('report.html', report=users)

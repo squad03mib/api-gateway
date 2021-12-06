@@ -259,6 +259,17 @@ paths:
           description: Renders the view_report template filled with the data of the
             current user
       x-openapi-router-controller: mib.views.users
+  /account/report/add:
+    get:
+      tags:
+      - User
+      summary: This method allows to retrieve the report page for the current user
+      operationId: account_report_get
+      responses:
+        "200":
+          description: Renders the view_report template filled with the data of the
+            current user
+      x-openapi-router-controller: mib.views.users
     post:
       tags:
       - User

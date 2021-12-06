@@ -37,12 +37,14 @@
       </thead>
       <tbody>
         {% for usr in users %}
+        {% if not usr.is_reported %}
         <tr>
           <td>{{ usr.email }}</td>
           <td>{{ usr.first_name }}</td>
           <td>{{ usr.last_name }}</td>
           <td>{{ usr.date_of_birth }}</td>
         </tr>
+        {% endif %}
         {% endfor %}
       </tbody>
     </table>
