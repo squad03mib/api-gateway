@@ -1,3 +1,4 @@
+import json
 from typing import List
 from flask import Blueprint, request, redirect, abort
 import flask
@@ -33,8 +34,8 @@ def send_message():
             #    recipient_error_list.append(email)
             check = True
             for user in user_list:
-                if user.is_active:
-                    recipient_list.append(user.id)
+                if user['is_active']:
+                    recipient_list.append(user['id'])
                     check = False
             if check:
                 recipient_error_list.append(email)
@@ -94,7 +95,7 @@ def draft():
     draft_post.recipients_list = []
     emails = data['receiver'].strip('\', [, ]')
     for email in emails:
-        draft_post.recipients_list.append(UserManager.get_user_by_email(email).id)
+        draft_post.recipients_list.append(UserManager.get_user_by_email(email)['id'])
     draft_post.date_delivery = parser.parse(data['date'])
     draft_post.text = data['text']
 
@@ -123,12 +124,12 @@ def chooseRecipient():
     raw_recipient_list :List[User]= UserManager.get_all_users()
     recipients = []
     for raw_recipient in raw_recipient_list:
-        if raw_recipient.email != current_user.email and\
-           not raw_recipient.is_admin and\
-           not raw_recipient.is_reported and\
-           raw_recipient.is_active:
+        if raw_recipient['email'] != current_user.email and\
+           raw_recipient['is_active']:
+# TODO:           not raw_recipient.is_reported and\
+#                 not raw_recipient['is_admin'] and\
            recipients.append(raw_recipient)
-
+    
     form = dict(recipients=recipients)
     return render_template("recipients.html", form=form)
 
@@ -140,10 +141,10 @@ def choose_recipient_msg(id_message):
     raw_recipient_list :List[User]= UserManager.get_all_users()
     recipients = []
     for raw_recipient in raw_recipient_list:
-        if raw_recipient.email != current_user.email and\
-           not raw_recipient.is_admin and\
-           not raw_recipient.is_reported and\
-           raw_recipient.is_active:
+        if raw_recipient['email'] != current_user.email and\
+           raw_recipient['is_active']:
+# TODO:           not raw_recipient.is_reported and\
+#                 not raw_recipient['is_admin'] and\
            recipients.append(raw_recipient)
     
     form = dict(recipients=recipients, id_message=id_message)
