@@ -9,8 +9,8 @@ class User(UserMixin):
     """
     id = None
     email = None
-    first_name = None
-    last_name = None
+    firstname = None
+    lastname = None
     date_of_birth = None
     is_active = None
     is_admin = None
@@ -35,8 +35,9 @@ class User(UserMixin):
         self.is_active = kw["is_active"]
         self.authenticated = kw["authenticated"]
         self.is_anonymous = kw["is_anonymous"]
-        self.first_name = kw["first_name"]
-        self.last_name = kw["last_name"]
+        self.firstname = kw["firstname"]
+        self.lastname = kw["lastname"]
+        self.date_of_birth = kw["date_of_birth"]
         self.extra_data = kw['extra']
 
     def get_id(self):

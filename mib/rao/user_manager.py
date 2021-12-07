@@ -125,8 +125,8 @@ class UserManager:
                                     json={
                                         'email': email,
                                         'password': password,
-                                        'first_name': firstname,
-                                        'last_name': lastname,
+                                        'firstname': firstname,
+                                        'lastname': lastname,
                                         'birthdate': birthdate,
                                     },
                                     timeout=cls.REQUESTS_TIMEOUT_SECONDS

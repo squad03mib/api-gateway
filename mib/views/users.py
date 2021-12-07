@@ -85,8 +85,8 @@ def get_user_info():
         return render_template('user_info.html', user=user)
     else:
         new_email = request.form["email"]
-        new_firstname = request.form["first_name"]
-        new_lastname = request.form["last_name"]
+        new_firstname = request.form["firstname"]
+        new_lastname = request.form["lastname"]
         new_date_of_birth = datetime.datetime.strptime(
             request.form["date_of_birth"], '%Y-%m-%d').date()
         new_password = request.form["password"]
@@ -173,7 +173,7 @@ def get_blacklist():
         user_blacklisted = UserManager.get_user_by_id(
             item['id_blacklisted'])
         users.append({'email': user_blacklisted.email,
-                     'firstname': user_blacklisted.first_name, 'lastname': user_blacklisted.last_name})
+                     'firstname': user_blacklisted.firstname, 'lastname': user_blacklisted.lastname})
 
     print(users)
 
@@ -226,6 +226,6 @@ def get_report():
         user_blacklisted = UserManager.get_user_by_id(
             item['id_reported'])
         users.append({'email': user_blacklisted.email,
-                     'firstname': user_blacklisted.first_name, 'lastname': user_blacklisted.last_name})
+                     'firstname': user_blacklisted.firstname, 'lastname': user_blacklisted.lastname})
 
     return render_template('report.html', report=users)
