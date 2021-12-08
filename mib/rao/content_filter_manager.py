@@ -16,22 +16,21 @@ class ContentFilterManager:
     REQUESTS_TIMEOUT_SECONDS = app.config['REQUESTS_TIMEOUT_SECONDS']
 
     @classmethod
-    def get_content_filter_info(cls, content_filter_id: int) -> ContentFilterInfo:
+    def get_content_filter_info(cls, content_filter_id: int) -> ContentFilter:
         ''' Get the content filter by id
         '''
         result = None
         try:
             url = "%s/users/%s/content_filter/%s" % (
                 cls.CONTENT_FILTER_ENDPOINT, str(current_user.id), str(content_filter_id))
-            response = requests.get(url, timeout=cls.REQUESTS_TIMEOUT_SECONDS)
+            response = requests.get(url)
             if response.status_code == 200:
-                result = ContentFilterInfo.from_dict(response.json())
+                result = ContentFilter.from_dict(response.json())
             if response.status_code == 404:
                 abort(404)
 
         except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
             return abort(500)
-
         return result
 
     @classmethod
