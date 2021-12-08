@@ -88,15 +88,20 @@ def get_user_info():
         new_firstname = request.form["firstname"]
         new_lastname = request.form["lastname"]
         new_date_of_birth = datetime.datetime.strptime(
-            request.form["date_of_birth"], '%Y-%m-%d').date()
+            request.form["birthdate"], '%Y-%m-%d').date()
         new_password = request.form["password"]
         user_dict = dict(email=new_email, firstname=new_firstname, lastname=new_lastname,
-                         date_of_birth=new_date_of_birth)
+                         date_of_birth=request.form["birthdate"])
 
-        checkEmail = UserManager.get_user_by_email(new_email)
+        if new_email != current_user.email:
+            checkEmail = UserManager.get_user_by_email(new_email)
+        else:
+            checkEmail = False
+
         if checkEmail:
             return render_template('user_info.html', emailError=True, user=user_dict)
 
+        current_user.email = new_email
         UserManager.update_user(current_user.id, new_email, new_firstname,
                                 new_lastname, new_password, new_date_of_birth)
         return render_template('user_info.html', user=user_dict)
