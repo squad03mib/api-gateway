@@ -14,7 +14,7 @@ class MessagePost(Model):
 
     Do not edit the class manually.
     """
-    def __init__(self, id_sender: int=None, recipients_list: List[object]=None, text: str=None, date_delivery: str=None, attachment_list: List[object]=None):  # noqa: E501
+    def __init__(self, id_sender: int=None, recipients_list: List[object]=None, text: str=None, date_delivery: str=None, attachment_list: List[object]=[]):  # noqa: E501
         """MessagePost - a model defined in Swagger
 
         :param id_sender: The id_sender of this MessagePost.  # noqa: E501

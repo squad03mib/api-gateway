@@ -46,7 +46,7 @@ def send_message():
         new_message = MessagePost()
         new_message.id_sender = current_user.id
         new_message.recipients_list = recipient_list
-        new_message.date_delivery = request.form.get('date')
+        new_message.date_delivery = request.form.get('date')+':00+01:00'
         new_message.text = request.form.get('text')
 
         new_message = MessageManager.send_message(new_message)
