@@ -31,7 +31,8 @@ class UserManager:
                 raise RuntimeError(
                     'Server has sent an unrecognized status code %s' % response.status_code)
 
-        except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
+        except (requests.exceptions.ConnectionError, requests.exceptions.Timeout) as e:
+            print(e)
             return abort(500)
 
         return user

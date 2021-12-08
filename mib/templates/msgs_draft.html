@@ -32,10 +32,10 @@
                             </tr>
                         </thead>
                         <tbody>
-                            {% for i in draft_msgs %}
+                            {% for item in draft_msgs %}
                                 <tr>
-                                    <td><a href="/message/send/{{i[0].id}}">{{ i[0].text }}</a></td>
-                                    <td>{{ i[1].email }}</td>
+                                    <td><a href="/message/send/{{item.draft.id_draft}}">{{ item.draft.text }}</a></td>
+                                    <td>{{ item.recipient.email }}</td>
                                 </tr>
                             {% endfor %}
                         </tbody>

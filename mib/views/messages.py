@@ -28,31 +28,26 @@ def send_message():
         for email in emails:
             email = email.strip(' ')
             user = UserManager.get_user_by_email(email)
-            if user is not None and user.is_active:
-                recipient_list.append(user.id)
-            '''user_list :List[User] = UserManager.get_user_by_email(email)
-             TODO: UserManager.get_user_by_email returns a List???
-            if db.session.query(User).filter(User.email == email,
-                                             User.is_active.is_(True), User.email != current_user.email).first() is None:
-                recipient_error_list.append(email)
             check = True
-            for user in user_list:
-                if user['is_active']:
-                    recipient_list.append(user['id'])
+            if  user is not None and user.is_active:
+                    recipient_list.append(user.id)
                     check = False
             if check:
-                recipient_error_list.append(email)'''
+                recipient_error_list.append(email)
 
         new_message = MessagePost()
         new_message.id_sender = current_user.id
         new_message.recipients_list = recipient_list
-        new_message.date_delivery = request.form.get('date')+':00+01:00'
+        new_message.date_delivery = request.form.get('date')#+':00+01:00'
         new_message.text = request.form.get('text')
 
         new_message = MessageManager.send_message(new_message)
 
         if new_message is not None:
             message_ok = True
+        else:
+            for email in emails:
+                recipient_error_list.append(email)
 
         return render_template("send_message.html", form=dict(), message_ok=message_ok,
                                recipient_error_list=recipient_error_list)
@@ -97,11 +92,14 @@ def draft():
     draft_post: DraftPost = DraftPost()
     draft_post.id_sender = current_user.id
     draft_post.recipients_list = []
-    emails = data['receiver'].strip('\', [, ]')
+    emails = data['receiver'].split(',')
+
     for email in emails:
-        draft_post.recipients_list.append(
-            UserManager.get_user_by_email(email)['id'])
-    draft_post.date_delivery = parser.parse(data['date'])
+        email = email.strip(' ')
+        user :User = UserManager.get_user_by_email(email)
+        if user is not None:
+            draft_post.recipients_list.append(user.id)
+    draft_post.date_delivery = data['date']
     draft_post.text = data['text']
 
     DraftManager.save_draft(draft_post)
@@ -200,17 +198,3 @@ def deleteMessage(message_id):
         abort(403)
     else:
         return redirect('/mailbox/received')
-
-
-@ messages.route('/mailbox/sent')
-@login_required
-def get_sent_messages():
-    list = MessageManager.get_all_messages('sent')
-    return render_template('msgs_sent.html', msgs_sent=list)
-
-
-@ messages.route('/mailbox/received')
-@login_required
-def get_received_messages():
-    list = MessageManager.get_all_messages('received')
-    return render_template('msgs_rcv.html', msgs_sent=list)

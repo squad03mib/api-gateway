@@ -32,11 +32,11 @@
                             </tr>
                         </thead>
                         <tbody>
-                            {% for i in msgs_rcv %}
+                            {% for item in msgs_rcv %}
                                 <tr>
-                                    <td><a href="/message/{{i[0].id}}">{{ i[0].text }}</a></td>
-                                    <td>{{ i[1].email }}</td>
-                                    <td><input class="btn btn-danger" formaction = "/message/{{i[0].id}}/delete" type="submit" value="Delete"></td>
+                                    <td><a href="/message/{{item.msg.id_message}}">{{ item.msg.text }}</a></td>
+                                    <td>{{ item.sender.email }}</td>
+                                    <td><input class="btn btn-danger" formaction = "/message/{{item.msg.id_message}}/delete" type="submit" value="Delete"></td>
                                 </tr>
                             {% endfor %}
                         </tbody>
