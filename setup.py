@@ -7,7 +7,7 @@ from setuptools import setup, find_packages
 
 _version_re = re.compile(r"__version__\s+=\s+(.*)")
 
-PROJECT = "mib-api-gateway"
+PROJECT = "mib"
 
 with open(PROJECT + "/__init__.py", "rb") as f:
     version = str(
