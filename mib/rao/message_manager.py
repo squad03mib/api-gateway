@@ -6,12 +6,13 @@ from flask import abort
 import requests
 from flask_login import current_user
 
+
 class MessageManager:
     MESSAGES_ENDPOINT = app.config['MESSAGES_MS_URL']
     REQUESTS_TIMEOUT_SECONDS = app.config['REQUESTS_TIMEOUT_SECONDS']
 
     @classmethod
-    def delete_message(cls, message_id :int) -> int:
+    def delete_message(cls, message_id: int) -> int:
         """
         Delete a message by its id
 
@@ -23,8 +24,10 @@ class MessageManager:
         status = 0
         try:
 
-            url = "%s/messages/%s?current_user_id=%s" % (cls.MESSAGES_ENDPOINT, message_id, current_user.id)
-            response = requests.delete(url, timeout=cls.REQUESTS_TIMEOUT_SECONDS)
+            url = "%s/messages/%s?current_user_id=%s" % (
+                cls.MESSAGES_ENDPOINT, message_id, current_user.id)
+            response = requests.delete(
+                url, timeout=cls.REQUESTS_TIMEOUT_SECONDS)
             status = response.status_code
 
         except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
@@ -33,7 +36,7 @@ class MessageManager:
         return status
 
     @classmethod
-    def get_all_messages(cls, type :str) -> List[Message]:
+    def get_all_messages(cls, type: str) -> List[Message]:
         """
         Get all messages list
 
@@ -44,8 +47,9 @@ class MessageManager:
         """
         message_list = []
         try:
-            
-            url = "%s/messages?type=%s&current_user_id=%s" % (cls.MESSAGES_ENDPOINT, type, current_user.id)
+
+            url = "%s/messages?type=%s&current_user_id=%s" % (
+                cls.MESSAGES_ENDPOINT, type, current_user.id)
             response = requests.get(url, timeout=cls.REQUESTS_TIMEOUT_SECONDS)
             if response.status_code == 200:
                 for item in response.json():
@@ -57,7 +61,7 @@ class MessageManager:
         return message_list
 
     @classmethod
-    def get_message(cls, message_id :int) -> Message:
+    def get_message(cls, message_id: int) -> Message:
         """
         Get a message by its id
 
@@ -68,8 +72,9 @@ class MessageManager:
         """
         message = None
         try:
-            
-            url = "%s/messages/%s?current_user_id=%s" % (cls.MESSAGES_ENDPOINT, message_id, current_user.id)
+
+            url = "%s/messages/%s?current_user_id=%s" % (
+                cls.MESSAGES_ENDPOINT, message_id, current_user.id)
             response = requests.get(url, timeout=cls.REQUESTS_TIMEOUT_SECONDS)
             if response.status_code == 200:
                 message = Message().from_dict(response.json())
@@ -80,7 +85,7 @@ class MessageManager:
         return message
 
     @classmethod
-    def send_message(cls, msg :MessagePost) -> Message:
+    def send_message(cls, msg: MessagePost) -> Message:
         """
         Send a new message
 
@@ -91,10 +96,11 @@ class MessageManager:
         """
         message = None
         try:
-            
-            url = "%s/messages?current_user_id=%s" % (cls.MESSAGES_ENDPOINT, current_user.id)
+
+            url = "%s/messages?current_user_id=%s" % (
+                cls.MESSAGES_ENDPOINT, current_user.id)
             response = requests.post(url,
-                json=msg.to_dict(), timeout=cls.REQUESTS_TIMEOUT_SECONDS)
+                                     json=msg.to_dict(), timeout=cls.REQUESTS_TIMEOUT_SECONDS)
             if response.status_code == 201:
                 message = Message().from_dict(response.json())
 
@@ -104,7 +110,7 @@ class MessageManager:
         return message
 
     @classmethod
-    def withdraw_message(cls, message_id :int) -> int:
+    def withdraw_message(cls, message_id: int) -> int:
         """
         Withdraw a sent message by its id
 
@@ -115,8 +121,9 @@ class MessageManager:
         """
         status = 0
         try:
-            
-            url = "%s/messages/%s/withdraw?current_user_id=%s" % (cls.MESSAGES_ENDPOINT, message_id, current_user.id)
+
+            url = "%s/messages/%s/withdraw?current_user_id=%s" % (
+                cls.MESSAGES_ENDPOINT, message_id, current_user.id)
             response = requests.post(url, timeout=cls.REQUESTS_TIMEOUT_SECONDS)
             status = response.status_code
 
@@ -124,4 +131,3 @@ class MessageManager:
             return abort(500)
 
         return status
-
