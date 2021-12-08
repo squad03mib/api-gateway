@@ -1,3 +1,5 @@
+[![squad03mib](https://circleci.com/gh/squad03mib/api-gateway.svg?style=svg)](https://app.circleci.com/pipelines/github/squad03mib/api-gateway)
+[![codecov](https://codecov.io/gh/squad03mib/api-gateway/branch/main/graph/badge.svg?token=9PCM5V8D0E)](https://codecov.io/gh/squad03mib/api-gateway)
 # Message In a Bottle - API Gateway
 
 This is the source code of Message in a Bottle API Gateway, self project of _Advanced Software Engineering_ course, University of Pisa.
