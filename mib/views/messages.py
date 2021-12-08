@@ -27,25 +27,28 @@ def send_message():
 
         for email in emails:
             email = email.strip(' ')
-            user_list :List[User] = UserManager.get_user_by_email(email)
-            # TODO: UserManager.get_user_by_email returns a List???
-            #if db.session.query(User).filter(User.email == email,
-            #                                 User.is_active.is_(True), User.email != current_user.email).first() is None:
-            #    recipient_error_list.append(email)
+            user = UserManager.get_user_by_email(email)
+            if user is not None and user.is_active:
+                recipient_list.append(user.id)
+            '''user_list :List[User] = UserManager.get_user_by_email(email)
+             TODO: UserManager.get_user_by_email returns a List???
+            if db.session.query(User).filter(User.email == email,
+                                             User.is_active.is_(True), User.email != current_user.email).first() is None:
+                recipient_error_list.append(email)
             check = True
             for user in user_list:
                 if user['is_active']:
                     recipient_list.append(user['id'])
                     check = False
             if check:
-                recipient_error_list.append(email)
+                recipient_error_list.append(email)'''
 
         new_message = MessagePost()
         new_message.id_sender = current_user.id
         new_message.recipients_list = recipient_list
         new_message.date_delivery = request.form.get('date')
         new_message.text = request.form.get('text')
-        
+
         new_message = MessageManager.send_message(new_message)
 
         if new_message is not None:
@@ -70,18 +73,19 @@ def send_draft(id_message):
     ''' GET: get the message page filled with the draft message (<id_message>) info
         POST: send the draft message and delete it from drafts '''
     if request.method == 'POST':
-        new_message :Message = DraftManager.send_draft(id_message)
+        new_message: Message = DraftManager.send_draft(id_message)
         message_ok = False if new_message is None else True
         return render_template("send_message.html", form=dict(), message_ok=message_ok)
     else:
-        draft :Draft = DraftManager.get_draft(id_message)
+        draft: Draft = DraftManager.get_draft(id_message)
         if draft is None:
             abort(404)
-        
+
         recipient_list = draft.recipients_list
         date = draft.date_delivery
         text = draft.text
-        form = dict(recipient=recipient_list, text=text, date=date, message_id=draft.id_draft)
+        form = dict(recipient=recipient_list, text=text,
+                    date=date, message_id=draft.id_draft)
         return render_template("send_message.html", form=form)
 
 
@@ -90,12 +94,13 @@ def send_draft(id_message):
 def draft():
     ''' POST: save a message as a draft '''
     data = request.form
-    draft_post :DraftPost = DraftPost()
+    draft_post: DraftPost = DraftPost()
     draft_post.id_sender = current_user.id
     draft_post.recipients_list = []
     emails = data['receiver'].strip('\', [, ]')
     for email in emails:
-        draft_post.recipients_list.append(UserManager.get_user_by_email(email)['id'])
+        draft_post.recipients_list.append(
+            UserManager.get_user_by_email(email)['id'])
     draft_post.date_delivery = parser.parse(data['date'])
     draft_post.text = data['text']
 
@@ -121,15 +126,14 @@ def send_forward_msg(id_message):
 @ login_required
 def chooseRecipient():
     ''' GET: get the page for choosing the recipient/s for a new message '''
-    raw_recipient_list :List[User]= UserManager.get_all_users()
+    raw_recipient_list: List[User] = UserManager.get_all_users()
     recipients = []
     for raw_recipient in raw_recipient_list:
         if raw_recipient['email'] != current_user.email and\
+            not raw_recipient["is_reported"] and\
            raw_recipient['is_active']:
-# TODO:           not raw_recipient.is_reported and\
-#                 not raw_recipient['is_admin'] and\
-           recipients.append(raw_recipient)
-    
+            recipients.append(raw_recipient)
+
     form = dict(recipients=recipients)
     return render_template("recipients.html", form=form)
 
@@ -138,15 +142,14 @@ def chooseRecipient():
 @ login_required
 def choose_recipient_msg(id_message):
     ''' GET: get the page for choosing the recipient/s for the chosen message'''
-    raw_recipient_list :List[User]= UserManager.get_all_users()
+    raw_recipient_list: List[User] = UserManager.get_all_users()
     recipients = []
     for raw_recipient in raw_recipient_list:
         if raw_recipient['email'] != current_user.email and\
+            not raw_recipient["is_reported"] and\
            raw_recipient['is_active']:
-# TODO:           not raw_recipient.is_reported and\
-#                 not raw_recipient['is_admin'] and\
-           recipients.append(raw_recipient)
-    
+            recipients.append(raw_recipient)
+
     form = dict(recipients=recipients, id_message=id_message)
     return render_template("recipients.html", form=form)
 
@@ -155,13 +158,13 @@ def choose_recipient_msg(id_message):
 @ login_required
 def view_message(message_id):
     ''' GET: visualize the chosen message '''
-    message :Message = MessageManager.get_message(message_id)
+    message: Message = MessageManager.get_message(message_id)
 
     if message is None:
         abort(404)
     else:
-        recipient :User = UserManager.get_user_by_id(message.id_recipient)
-        sender :User = UserManager.get_user_by_id(message.id_sender)
+        recipient: User = UserManager.get_user_by_id(message.id_recipient)
+        sender: User = UserManager.get_user_by_id(message.id_sender)
         return render_template("message.html",
                                sender=sender,
                                recipient=recipient,
@@ -173,12 +176,12 @@ def view_message(message_id):
 @ login_required
 def withdraw_message(id):
     ''' POST: withdraw a message not sent yet, paying points '''
-    
-    ret :int = MessageManager.withdraw_message(id)
 
-    if ret==404:
+    ret: int = MessageManager.withdraw_message(id)
+
+    if ret == 404:
         abort(404)
-    elif ret==403:
+    elif ret == 403:
         abort(403)
     else:
         return redirect('/mailbox/sent')
@@ -188,12 +191,26 @@ def withdraw_message(id):
 @login_required
 def deleteMessage(message_id):
     ''' POST: delete the chosen message '''
-    
-    ret :int = MessageManager.delete_message(message_id)
 
-    if ret==404:
+    ret: int = MessageManager.delete_message(message_id)
+
+    if ret == 404:
         abort(404)
-    elif ret==403:
+    elif ret == 403:
         abort(403)
     else:
         return redirect('/mailbox/received')
+
+
+@ messages.route('/mailbox/sent')
+@login_required
+def get_sent_messages():
+    list = MessageManager.get_all_messages('sent')
+    return render_template('msgs_sent.html', msgs_sent=list)
+
+
+@ messages.route('/mailbox/received')
+@login_required
+def get_received_messages():
+    list = MessageManager.get_all_messages('received')
+    return render_template('msgs_rcv.html', msgs_sent=list)

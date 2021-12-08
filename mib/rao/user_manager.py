@@ -60,6 +60,24 @@ class UserManager:
         return user
 
     @classmethod
+    def get_users_by_email(cls, user_email):
+        try:
+            response = requests.get("%s/user_email/%s" % (cls.USERS_ENDPOINT, user_email),
+                                    timeout=cls.REQUESTS_TIMEOUT_SECONDS)
+            print(response)
+            json_payload = response.json()
+            user = None
+
+            if response.status_code == 200:
+                user = User.build_from_json(json_payload)
+
+        except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
+            return abort(500)
+
+        return [user]
+
+
+    @classmethod
     def get_user_by_phone(cls, user_phone: str) -> User:
         """
         This method contacts the users microservice
