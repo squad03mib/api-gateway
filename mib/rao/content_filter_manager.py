@@ -1,5 +1,6 @@
 from mib.auth.user import User
 from mib import app
+from mib.models import purify_message
 from mib.models.content_filter import ContentFilter
 from mib.models.content_filter_info import ContentFilterInfo
 from mib.models.content_filter_info_put import ContentFilterInfoPUT
@@ -70,6 +71,26 @@ class ContentFilterManager:
                 abort(404)
             if response.status_code == 403:
                 abort(403)
+
+        except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
+            return abort(500)
+
+        return result
+
+    @classmethod
+    def purify_message(cls, text: str) -> PurifyMessage:
+        ''' Purify the message
+        '''
+        result = None
+        purified_message = PurifyMessage()
+        purified_message.text = text
+        try:
+            url = "%s/users/%s/content_filter/purify_message" % (
+                cls.CONTENT_FILTER_ENDPOINT, str(current_user.id))
+            response = requests.post(
+                url, timeout=cls.REQUESTS_TIMEOUT_SECONDS, json=purified_message.to_dict())
+            if response.status_code == 200:
+                result = PurifyMessage.from_dict(response.json())
 
         except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
             return abort(500)
