@@ -34,7 +34,7 @@
                         <tbody>
                             {% for item in draft_msgs %}
                                 <tr>
-                                    <td><a href="/message/send/{{item.draft.id_draft}}">{{ item.draft.text }}</a></td>
+                                    <td><a href="/drafts/{{item.draft.id_draft}}">{{ item.draft.text }}</a></td>
                                     <td>{{ item.recipient.email }}</td>
                                 </tr>
                             {% endfor %}

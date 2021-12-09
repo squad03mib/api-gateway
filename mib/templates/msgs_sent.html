@@ -36,10 +36,10 @@
                         <tbody>
                             {% for item in msgs_sent %}
                                 <tr>
-                                    <td> <a href="/message/{{item.msg.id_message}}">{{ item.msg.text }}</a></td>
+                                    <td> <a href="/messages/{{item.msg.id_message}}">{{ item.msg.text }}</a></td>
                                     <td>{{ item.recipient.email }}</td>
                                     {% if not item.msg.message_delivered and points >= 100%}
-                                    <td><input class="btn" style="background-color: #E5BE6B;" formaction = "/message/withdraw/{{item.msg.id_message}}" type="submit" value="Withdraw"></td>
+                                    <td><input class="btn" style="background-color: #E5BE6B;" formaction = "/message/{{item.msg.id_message}}/withdraw" type="submit" value="Withdraw"></td>
                                     {% else %}
                                     <td></td>
                                     {% endif %}

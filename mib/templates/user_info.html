@@ -116,7 +116,7 @@
     }
 
     checkbox = document.getElementById('content_filter')
-    httpGetAsync('/userinfo/content_filter/0', (ret) => {
+    httpGetAsync('/account/content_filters/0', (ret) => {
       if (JSON.parse(ret).filter_active) {
         checkbox.checked = true;
       } else {
@@ -124,7 +124,7 @@
       }
 
       checkbox.oninput = () => {
-        httpPutAsync('/userinfo/content_filter/0', { 'active': checkbox.checked })
+        httpPutAsync('/account/content_filters/0', { 'active': checkbox.checked })
       }
       checkbox.style.display = ''
     })

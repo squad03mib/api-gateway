@@ -1,4 +1,5 @@
 
+from typing import List
 from flask import Blueprint, redirect, render_template, url_for, flash, request
 from flask_login import (login_user, login_required, current_user)
 import datetime
@@ -9,7 +10,7 @@ from mib.auth.user import User
 users = Blueprint('users', __name__)
 
 
-@users.route('/create_user/', methods=['GET', 'POST'])
+@users.route('/signup/', methods=['GET'])
 def create_user():
     """This method allows the creation of a new user into the database
 
@@ -17,40 +18,6 @@ def create_user():
         Redirects the user into his profile page, once he's logged in
     """
     form = UserForm()
-
-    if form.is_submitted():
-        email = form.data['email']
-        password = form.data['password']
-        firstname = form.data['firstname']
-        lastname = form.data['lastname']
-        birthdate = form.data['birthdate']
-        date = birthdate.strftime('%Y-%m-%d')
-        response = UserManager.create_user(
-            email,
-            password,
-            firstname,
-            lastname,
-            date,
-        )
-
-        if response.status_code == 201:
-            # in this case the request is ok!
-            user = response.json()
-            to_login = User.build_from_json(user)
-            login_user(to_login)
-            return redirect('/')
-        elif response.status_code == 200:
-            # user already exists
-            flash('User already exists!')
-            return render_template('create_user.html', form=form)
-        else:
-            flash('Unexpected response from users microservice!')
-            return render_template('create_user.html', form=form)
-    else:
-        for fieldName, errorMessages in form.errors.items():
-            for errorMessage in errorMessages:
-                flash('The field %s is incorrect: %s' %
-                      (fieldName, errorMessage))
 
     return render_template('create_user.html', form=form)
 
@@ -75,7 +42,7 @@ def delete_user(id):
     return redirect(url_for('home.index'))
 
 
-@ users.route('/userinfo', methods=["GET", "POST"])
+@ users.route('/account', methods=["GET", "POST"])
 @ login_required
 def get_user_info():
     ''' GET: get the profile info page
@@ -112,8 +79,65 @@ def get_users():
        POST: create a user'''
     if request.method == 'GET':
         users = UserManager.get_all_users()
+        return render_template('users.html', users=users)
+    
+    else:
+        form = UserForm()
 
-    return render_template('users.html', users=users)
+        if form.is_submitted():
+            email = form.data['email']
+            password = form.data['password']
+            firstname = form.data['firstname']
+            lastname = form.data['lastname']
+            birthdate = form.data['birthdate']
+            date = birthdate.strftime('%Y-%m-%d')
+            response = UserManager.create_user(
+                email,
+                password,
+                firstname,
+                lastname,
+                date,
+            )
+
+            if response.status_code == 201:
+                # in this case the request is ok!
+                user = response.json()
+                to_login = User.build_from_json(user)
+                login_user(to_login)
+                return redirect('/')
+            elif response.status_code == 200:
+                # user already exists
+                flash('User already exists!')
+                return render_template('create_user.html', form=form)
+            else:
+                flash('Unexpected response from users microservice!')
+                return render_template('create_user.html', form=form)
+        else:
+            for fieldName, errorMessages in form.errors.items():
+                for errorMessage in errorMessages:
+                    flash('The field %s is incorrect: %s' %
+                        (fieldName, errorMessage))
+
+    return render_template('create_user.html', form=form)
+
+
+@ users.route('/account/blacklist', methods=["GET"])
+@ login_required
+def get_blacklist():
+    '''GET: get the user blacklist'''
+    blacklist = UserManager.get_blacklist(current_user.id)
+
+    users = []
+
+    for item in blacklist:
+        user_blacklisted = UserManager.get_user_by_id(
+            item['id_blacklisted'])
+        users.append({'email': user_blacklisted.email,
+                     'firstname': user_blacklisted.firstname, 'lastname': user_blacklisted.lastname})
+
+    print(users)
+
+    return render_template('blacklist.html', blacklist=users)
 
 
 @ users.route('/account/blacklist/add', methods=["GET", "POST"])
@@ -164,23 +188,21 @@ def remove_user_from_blacklist():
         return redirect('/account/blacklist')
 
 
-@ users.route('/account/blacklist', methods=["GET"])
+@ users.route('/account/report', methods=["GET"])
 @ login_required
-def get_blacklist():
-    '''GET: get the user blacklist'''
-    blacklist = UserManager.get_blacklist(current_user.id)
+def get_report():
+    '''GET: get the list of reported users'''
+    report = UserManager.get_report(current_user.id)
 
     users = []
 
-    for item in blacklist:
+    for item in report:
         user_blacklisted = UserManager.get_user_by_id(
-            item['id_blacklisted'])
+            item['id_reported'])
         users.append({'email': user_blacklisted.email,
                      'firstname': user_blacklisted.firstname, 'lastname': user_blacklisted.lastname})
 
-    print(users)
-
-    return render_template('blacklist.html', blacklist=users)
+    return render_template('report.html', report=users)
 
 
 @ users.route('/account/report/add', methods=["GET", "POST"])
@@ -217,18 +239,23 @@ def add_user_to_report():
         return render_template('report_user.html', users=users)
 
 
-@ users.route('/account/report', methods=["GET"])
-@ login_required
-def get_report():
-    '''GET: get the list of reported users'''
-    report = UserManager.get_report(current_user.id)
 
-    users = []
-
-    for item in report:
-        user_blacklisted = UserManager.get_user_by_id(
-            item['id_reported'])
-        users.append({'email': user_blacklisted.email,
-                     'firstname': user_blacklisted.firstname, 'lastname': user_blacklisted.lastname})
-
-    return render_template('report.html', report=users)
+@users.route("/recipients", methods=["GET"])
+@login_required
+def chooseRecipient():
+    ''' GET: get the page for choosing the recipient/s for a new message '''
+    raw_recipient_list: List[User] = UserManager.get_all_users()
+    recipients = []
+    for raw_recipient in raw_recipient_list:
+        if raw_recipient['email'] != current_user.email and\
+            not raw_recipient["is_reported"] and\
+           raw_recipient['is_active']:
+            recipients.append(raw_recipient)
+    
+    id_message = request.args.get('message', None)
+    id_draft = request.args.get('draft', None)
+    form = dict(recipients=recipients, id_message=id_message, id_draft=id_draft)
+    print("OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO")
+    print(form)
+    print("OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO")
+    return render_template("recipients.html", form=form)

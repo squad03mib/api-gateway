@@ -39,8 +39,9 @@
         <button type="submit" role="button" class="btn mt-2" style="background-color: 175D7E;color: aliceblue;">Reply</button>
         {% endif %}
       </form>
-      <form style="display: inline" method = "get" action="/message/recipients/{{message.id}}">
-        <button type="submit" class="btn mt-2" name="forward" role="button" style="background-color: #E5BE6B;margin-bottom: 1px;">Forward</button>
+      <form style="display: inline" method = "get" action="/recipients">
+        <input name="message" value="{{message.id_message}}" hidden>
+        <button type="submit" class="btn mt-2" role="button" style="background-color: #E5BE6B;margin-bottom: 1px;">Forward</button>
       </form>
       {% if images %}
       {% for image in images %}

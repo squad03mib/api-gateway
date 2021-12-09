@@ -45,18 +45,20 @@
     <h4 style="margin-left: 9%;">Choose a recipient for your message</h4>
     <br>
     <input type="text" id="myInput" onkeyup="search()" placeholder="Search recipient">
-    {% if "id_message" in form %}
-    <form action='/message/forward/{{form["id_message"]}}' method='GET'>
-      {% else %}
-      <form method="get" action="/message/send" class="inline">
-        {% endif %}
+    {% if "id_message" in form and form["id_message"] is not none %}
+      <form action='/messages/{{form["id_message"]}}/forward' method='GET'>
+    {% elif "id_draft" in form  and form["id_draft"] is not none %}
+      <form action='/drafts/{{form["id_draft"]}}' method='GET'>
+    {% else %}
+      <form action='/messages/send' method='GET'>
+    {% endif %}
         <ul id="myUL">
-          {% for rec in form['recipients'] : %}
+        {% for rec in form['recipients'] : %}
           <li class="list-group-item link-button w-50 rounded">
             <input type="checkbox" name="recipient" value="{{rec.email}}">
             {{rec.email}}
           </li>
-          {% endfor %}
+        {% endfor %}
         </ul>
         <br>
         <div class="col" style="margin-left: 18%;">

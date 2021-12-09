@@ -6,7 +6,7 @@ from mib.models.content_filter import ContentFilter
 content_filter = Blueprint('content_filter', __name__)
 
 
-@content_filter.route('/userinfo/content_filter/<filter_id>', methods=['GET', 'PUT'])
+@content_filter.route('/account/content_filters/<filter_id>', methods=['GET', 'PUT'])
 @login_required
 def user_content_filter(filter_id):
     if request.method == 'GET':

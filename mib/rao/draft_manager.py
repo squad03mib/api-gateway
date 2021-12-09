@@ -67,7 +67,7 @@ class DraftManager:
         draft = None
         try:
             
-            url = "%s/draft/%s?current_user_id=%s" % (cls.MESSAGES_ENDPOINT, draft_id, current_user.id)
+            url = "%s/drafts/%s?current_user_id=%s" % (cls.MESSAGES_ENDPOINT, draft_id, current_user.id)
             response = requests.get(url, timeout=cls.REQUESTS_TIMEOUT_SECONDS)
             if response.status_code == 200:
                 draft = Draft().from_dict(response.json())
