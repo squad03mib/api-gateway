@@ -98,7 +98,7 @@ def deleteMessage(message_id):
     elif ret == 403:
         abort(403)
     else:
-        return redirect('/mailbox/received')
+        return redirect('/inbox')
 
 
 @messages.route("/messages/<id>/withdraw", methods=['POST'])
@@ -113,7 +113,7 @@ def withdraw_message(id):
     elif ret == 403:
         abort(403)
     else:
-        return redirect('/mailbox/sent')
+        return redirect('/outbox')
 
 @messages.route('/messages/<id_message>/forward', methods=['GET'])
 @login_required
