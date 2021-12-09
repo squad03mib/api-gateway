@@ -73,7 +73,6 @@ def get_user_info():
 
 
 @ users.route('/users', methods=["GET", "POST"])
-@ login_required
 def get_users():
     '''GET: get the list of users
        POST: create a user'''
