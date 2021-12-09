@@ -21,6 +21,14 @@
    {% include "menu.html" %}
 
         <div class="container mt-4">
+            {% if message_ok %}
+                <div class="alert alert-success alert-dismissible fade show pt-3" role="alert">
+                Message sent correctly!
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                </div>
+            {%endif%}
             <h2>Draft Messages</h2>
             <br>
                 {% if draft_msgs  %}

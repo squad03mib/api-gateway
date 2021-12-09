@@ -1,4 +1,5 @@
 import pytz
+import base64
 from typing import List
 from flask import Blueprint, request, redirect, abort
 import flask
@@ -64,31 +65,52 @@ def view_draft(draft_id):
     if draft is None:
         abort(404)
     if request.method == 'GET':
-        recipient: User = None
-        if draft.recipients_list is not None and len(draft.recipients_list) > 0:
+        recipients_email_list :str = ''
+        emails = request.args.items(multi=True)
+        
+        for email in emails:
+            if email[1] != '':
+                recipients_email_list += email[1] if recipients_email_list == '' else ', ' + email[1]
+            
+        if recipients_email_list == '' and draft.recipients_list is not None and len(draft.recipients_list) > 0:
             recipient = UserManager.get_user_by_id(draft.recipients_list[0])
+            recipients_email_list += recipient.email
+            for i in range(1, len(draft.recipients_list)):
+                recipient = UserManager.get_user_by_id(draft.recipients_list[i])
+                recipients_email_list += ', ' + recipient.email
+        
         sender: User = UserManager.get_user_by_id(draft.id_sender)
         
         draft.date_delivery = datetime.fromisoformat(draft.date_delivery).strftime('%Y-%m-%d %H:%M')
 
-        form = dict(recipient = recipient, sender = sender, draft=draft)
+        form = dict(recipients_email_list = recipients_email_list, sender = sender, draft=draft)
 
         return render_template("edit_draft.html", form=form)
     else:
-        emails = request.form.get('receiver').split(',')
-        recipient_list = []
+        DraftManager.delete_draft(draft_id)
+
+        data = request.form
+        draft_post: DraftPost = DraftPost()
+        draft_post.id_sender = current_user.id
+        draft_post.recipients_list = []
+        emails = data['receiver'].split(',')
 
         for email in emails:
             email = email.strip(' ')
-            user = UserManager.get_user_by_email(email)
-            if  user is not None and user.is_active:
-                    recipient_list.append(user.id)
+            user :User = UserManager.get_user_by_email(email)
+            if user is not None:
+                draft_post.recipients_list.append(user.id)
+        draft_date = request.form.get('date')
+        tz=timezone(timedelta(hours=1))
+        draft_date = datetime.fromisoformat(draft_date)
+        draft_date = draft_date.replace(tzinfo=tz)
+        draft_date = draft_date.astimezone(pytz.UTC)
+        draft_date = draft_date.isoformat()
+        draft_post.date_delivery = draft_date
+        draft_post.text = data['text']
 
-        draft.recipients_list = recipient_list
-        draft.date_delivery = request.form.get('date')
-        draft.text = request.form.get('text')
+        DraftManager.save_draft(draft_post)
 
-        DraftManager.save_draft(draft)
         return redirect('/drafts')
 
 
@@ -96,6 +118,33 @@ def view_draft(draft_id):
 @login_required
 def send_draft(id_draft):
     ''' POST: send the draft message and delete it from drafts '''
-    new_draft: Message = DraftManager.send_draft(id_draft)
+    DraftManager.delete_draft(id_draft)
+
+    data = request.form
+    draft_post: DraftPost = DraftPost()
+    draft_post.id_sender = current_user.id
+    draft_post.recipients_list = []
+    emails = data['receiver'].split(',')
+
+    for email in emails:
+        email = email.strip(' ')
+        user :User = UserManager.get_user_by_email(email)
+        if user is not None:
+            draft_post.recipients_list.append(user.id)
+    draft_date = request.form.get('date')
+    tz=timezone(timedelta(hours=1))
+    draft_date = datetime.fromisoformat(draft_date)
+    draft_date = draft_date.replace(tzinfo=tz)
+    draft_date = draft_date.astimezone(pytz.UTC)
+    draft_date = draft_date.isoformat()
+    draft_post.date_delivery = draft_date
+    draft_post.text = data['text']
+
+    for file in request.files:
+        attachment = request.files[file].read()
+        draft_post.attachment_list.append(base64.b64encode(attachment).decode('ascii'))
+
+    draft = DraftManager.save_draft(draft_post)
+    new_draft: Message = DraftManager.send_draft(draft.id_draft)
     message_ok = False if new_draft is None else True
-    return render_template("send_message.html", form=dict(), message_ok=message_ok)
+    return redirect('/draft', message_ok=message_ok)

@@ -1,4 +1,5 @@
 import pytz
+import base64
 from typing import List
 from flask import Blueprint, request, redirect, abort
 import flask
@@ -38,14 +39,20 @@ def send_message():
         new_message = MessagePost()
         new_message.id_sender = current_user.id
         new_message.recipients_list = recipient_list
+
         message_date = request.form.get('date')
         tz=timezone(timedelta(hours=1))
         message_date = datetime.fromisoformat(message_date)
         message_date = message_date.replace(tzinfo=tz)
         message_date = message_date.astimezone(pytz.UTC)
         message_date = message_date.isoformat()
+
         new_message.date_delivery = message_date
         new_message.text = request.form.get('text')
+
+        for file in request.files:
+            attachment = request.files[file].read()
+            new_message.attachment_list.append(base64.b64encode(attachment).decode('ascii'))
 
         new_message = MessageManager.send_message(new_message)
 

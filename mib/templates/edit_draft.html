@@ -1,7 +1,7 @@
 <html>
 
 <head>
-  <title>Send a message</title>
+  <title>Draft</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
@@ -47,7 +47,7 @@
           {% if reply %}
           <input required value='{{reply}}' name="receiver" id="receiver" />
           {% else %}
-          <input required value='{{form["recipient"].email}}' name="receiver" placeholder="Enter email" id="receiver" size="50" />
+          <input required value='{{form["recipients_email_list"]}}' name="receiver" placeholder="Enter email" id="receiver" size="50" />
           {% endif %}
         </div>
 
@@ -70,9 +70,9 @@
         <a href="/recipients?draft={{form['draft'].id_draft}}" class="btn"
           style="background-color: #E5BE6B;margin-bottom: 1.5px;float: right; ">Choose recipient</a>
 
-        <button type="Submit" name="draft" class="btn"
+        <button type="Submit" class="btn" formaction="/drafts/{{form['draft'].id_draft}}"
           style="background-color: 175D7E; margin-bottom: 1.5px; color: aliceblue; float:right;margin-right: 5px;">
-          Draft
+          Save
         </button>
 
       </form>
