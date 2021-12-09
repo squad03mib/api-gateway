@@ -23,13 +23,11 @@ class ViewTest(unittest.TestCase):
         """
         user = self.generate_user()
         response = self.user_manager.create_user(
-                'customer',
                 user.get('email'),
                 user.get('password'),
                 user.get('firstname'),
                 user.get('lastname'),
                 user.get('birthdate'),
-                user.get('phone')
                 )
 
         rv = self.client.post(
@@ -37,7 +35,7 @@ class ViewTest(unittest.TestCase):
             json=user
         )
         return user
-    
+
     def generate_user(self):
         """Generates a random user, depending on the type
         Returns:
@@ -54,6 +52,5 @@ class ViewTest(unittest.TestCase):
             'firstname': self.faker.first_name(),
             'lastname': self.faker.last_name(),
             'birthdate': self.faker.date(),
-            'phone': self.faker.phone_number()
         }
         return data

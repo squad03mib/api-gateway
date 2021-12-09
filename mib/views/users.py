@@ -87,8 +87,6 @@ def get_user_info():
         new_email = request.form["email"]
         new_firstname = request.form["firstname"]
         new_lastname = request.form["lastname"]
-        new_date_of_birth = datetime.datetime.strptime(
-            request.form["birthdate"], '%Y-%m-%d').date()
         new_password = request.form["password"]
         user_dict = dict(email=new_email, firstname=new_firstname, lastname=new_lastname,
                          date_of_birth=request.form["birthdate"])
@@ -103,7 +101,7 @@ def get_user_info():
 
         current_user.email = new_email
         UserManager.update_user(current_user.id, new_email, new_firstname,
-                                new_lastname, new_password, new_date_of_birth)
+                                new_lastname, new_password, request.form["birthdate"])
         return render_template('user_info.html', user=user_dict)
 
 
