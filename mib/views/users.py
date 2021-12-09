@@ -3,6 +3,8 @@ from typing import List
 from flask import Blueprint, redirect, render_template, url_for, flash, request
 from flask_login import (login_user, login_required, current_user)
 import datetime
+
+from flask_login.utils import logout_user
 from mib.forms import UserForm
 from mib.rao.user_manager import UserManager
 from mib.auth.user import User
@@ -35,11 +37,11 @@ def delete_user(id):
     """
 
     response = UserManager.delete_user(id)
-    if response.status_code != 202:
+    if response.status_code != 200:
         flash("Error while deleting the user")
         return redirect(url_for('auth.profile', id=id))
-
-    return redirect(url_for('home.index'))
+    logout_user()
+    return redirect("/")
 
 
 @ users.route('/account', methods=["GET", "POST"])

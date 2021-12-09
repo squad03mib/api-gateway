@@ -143,7 +143,7 @@
           <p>Are you sure?</p>
         </div>
         <div class="modal-footer">
-          <form action="/delete_user" method="POST">
+          <form action="/delete_user/{{current_user.id}}" method="POST">
             <button type="submit" class="btn" style="background-color: #D35E5E;">Yes</a>
           </form>
           <button type="button" class="btn btn-secondary" data-dismiss="modal">No</button>
