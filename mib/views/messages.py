@@ -1,9 +1,9 @@
-import json
+import pytz
 from typing import List
 from flask import Blueprint, request, redirect, abort
 import flask
 from flask_login.utils import login_required
-from dateutil import parser
+from datetime import datetime, timedelta, timezone
 from flask.templating import render_template
 from flask_login import current_user
 from mib.rao.user_manager import UserManager, User
@@ -38,7 +38,13 @@ def send_message():
         new_message = MessagePost()
         new_message.id_sender = current_user.id
         new_message.recipients_list = recipient_list
-        new_message.date_delivery = request.form.get('date')#+':00+01:00'
+        message_date = request.form.get('date')
+        tz=timezone(timedelta(hours=1))
+        message_date = datetime.fromisoformat(message_date)
+        message_date = message_date.replace(tzinfo=tz)
+        message_date = message_date.astimezone(pytz.UTC)
+        message_date = message_date.isoformat()
+        new_message.date_delivery = message_date
         new_message.text = request.form.get('text')
 
         new_message = MessageManager.send_message(new_message)
@@ -99,7 +105,13 @@ def draft():
         user :User = UserManager.get_user_by_email(email)
         if user is not None:
             draft_post.recipients_list.append(user.id)
-    draft_post.date_delivery = data['date']
+    draft_date = request.form.get('date')
+    tz=timezone(timedelta(hours=1))
+    draft_date = datetime.fromisoformat(draft_date)
+    draft_date = draft_date.replace(tzinfo=tz)
+    draft_date = draft_date.astimezone(pytz.UTC)
+    draft_date = draft_date.isoformat()
+    draft_post.date_delivery = draft_date
     draft_post.text = data['text']
 
     DraftManager.save_draft(draft_post)
