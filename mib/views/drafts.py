@@ -145,6 +145,5 @@ def send_draft(id_draft):
         draft_post.attachment_list.append(base64.b64encode(attachment).decode('ascii'))
 
     draft = DraftManager.save_draft(draft_post)
-    new_draft: Message = DraftManager.send_draft(draft.id_draft)
-    message_ok = False if new_draft is None else True
-    return redirect('/draft', message_ok=message_ok)
+    DraftManager.send_draft(draft.id_draft)
+    return redirect('/outbox')
