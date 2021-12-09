@@ -17,6 +17,8 @@ def see_sent_messages():
     ''' GET: get the inbox page '''
     msgs_sent = []
     msg_list :List[Message] = MessageManager.get_all_messages('sent')
+    lottery = {}
+    lottery['points'] = 0
     for msg in msg_list:
         user :User = UserManager.get_user_by_id(msg.id_recipient)
         lottery = LotteryManager.get_lottery_by_id_user(current_user.id)
