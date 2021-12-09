@@ -6,7 +6,7 @@ from .lottery import lottery
 from .mailbox import mailbox
 from .messages import messages
 from .content_filter import content_filter
-
+from .calendar import calendar
 """List of the views to be visible through the project
 """
-blueprints = [home, auth, users, lottery, messages, mailbox, content_filter, drafts]
+blueprints = [home, auth, users, lottery, messages, mailbox, content_filter, drafts, calendar]

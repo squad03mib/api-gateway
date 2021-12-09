@@ -254,7 +254,5 @@ def chooseRecipient():
     id_message = request.args.get('message', None)
     id_draft = request.args.get('draft', None)
     form = dict(recipients=recipients, id_message=id_message, id_draft=id_draft)
-    print("OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO")
     print(form)
-    print("OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO")
     return render_template("recipients.html", form=form)
