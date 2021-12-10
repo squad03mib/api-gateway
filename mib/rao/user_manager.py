@@ -26,7 +26,7 @@ class UserManager:
             if response.status_code == 200:
                 # user is authenticated
                 user = User.build_from_json(json_payload)
-                print("risposta: ", user)
+                
             else:
                 raise RuntimeError(
                     'Server has sent an unrecognized status code %s' % response.status_code)
@@ -48,7 +48,7 @@ class UserManager:
         try:
             response = requests.get("%s/user_email/%s" % (cls.USERS_ENDPOINT, user_email),
                                     timeout=cls.REQUESTS_TIMEOUT_SECONDS)
-            print(response)
+            
             json_payload = response.json()
             user = None
 
@@ -168,12 +168,12 @@ class UserManager:
         """
         payload = dict(email=email, password=password)
         try:
-            print('trying response....')
+            
             response = requests.post('%s/authenticate' % cls.USERS_ENDPOINT,
                                      json=payload,
                                      timeout=cls.REQUESTS_TIMEOUT_SECONDS
                                      )
-            print('received response....')
+            
             json_response = response.json()
         except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
             # We can't connect to Users MS
