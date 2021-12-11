@@ -64,7 +64,7 @@
 
 
         <button type="Submit" value="submit" class="btn" style="background-color: 92C991">Send</button>
-        <input type="file" id="files" name="files" multiple>
+        <input type="file" id="files" name="files" value="" multiple>
         {% if "message_id" in form%}
         <a href="/recipients?message={{form['message_id']}}" class="btn"
           style="background-color: #E5BE6B;margin-bottom: 1.5px;float: right; ">Choose recipient</a>

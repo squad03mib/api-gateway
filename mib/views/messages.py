@@ -2,7 +2,6 @@ import pytz
 import base64
 from typing import List
 from flask import Blueprint, request, redirect, abort
-import flask
 from flask_login.utils import login_required
 from datetime import datetime, timedelta, timezone
 from flask.templating import render_template
@@ -36,7 +35,8 @@ def send_message():
             if check:
                 recipient_error_list.append(email)
 
-        new_message = MessagePost()
+        new_message :MessagePost = MessagePost()
+        new_message.attachment_list = []
         new_message.id_sender = current_user.id
         new_message.recipients_list = recipient_list
 
@@ -49,11 +49,14 @@ def send_message():
 
         new_message.date_delivery = message_date
         new_message.text = request.form.get('text')
+        uploaded_files = request.files.getlist("files")
 
-        for file in request.files:
-            attachment = request.files[file].read()
-            new_message.attachment_list.append(base64.b64encode(attachment).decode('ascii'))
-
+        if uploaded_files and any(f for f in uploaded_files):
+            for file in uploaded_files:
+                if file:
+                    attachment = file.read()
+                    new_message.attachment_list.append(base64.b64encode(attachment).decode('ascii'))
+        
         new_message = MessageManager.send_message(new_message)
 
         if new_message is not None:
